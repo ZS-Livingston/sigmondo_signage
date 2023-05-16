@@ -5,6 +5,7 @@ read -r listfile
 
 printf "Please enter the file to move: "
 read -r file
+echo $file
 
 # For each Onedrive in the list: 
 #
@@ -15,22 +16,24 @@ read -r file
 while IFS=$'\t' read -r f1
 do
 	apps=$(rclone ls --include "*/SIGMONDO/**" "$f1:" | perl -ne 'if (/(\d+ )(\w+)((\/\w+)+)/) {print "$2\n"; exit;}')
+	echo $apps
 	if [[ -n "$apps" ]]
 	then
 		printf "SIGMONDO exists on the target remote %s in %s directory.\n" "$f1" "$apps"
 		
 		# Check if "Signage Archive" directory exists
-		archive=$(rclone ls --include "*/Signage Archive/**" "$f1:" | perl -ne 'if (/(\d+ )(\w+)((\/\w+)+)/) {print "$2\n"; exit;}')
+		archive=$(rclone lsf "$f1:" | grep -io "^Signage Archive")
+		echo $archive
 		if [[ -z "$archive" ]]
 		then
 			# If "Signage Archive" directory doesn't exist, create it
-			rclone mkdir "$f1:$apps/Signage Archive"
-			printf "Created Signage Archive directory on %s:%s/Signage Archive/\n" "$f1" "$apps"
+			rclone mkdir "$f1:Signage Archive"
+			printf "Created Signage Archive directory on %s:/Signage Archive/\n" "$f1"
 		fi
 		
 		# Move the file
-		rclone moveto "$f1:$apps/SIGMONDO/Main Area Media/$file" "$f1:$apps/Signage Archive/$file" \
-		&& printf "File moved to %s:%s/Signage Archive/\n" "$f1" "$apps"
+		rclone moveto "$f1:$file" "$f1:$archive/${file##*/}" \
+		&& printf "File moved to %s:/%s/\n" "$f1" "$archive"
 	fi
 
 done <"$listfile"
