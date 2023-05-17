@@ -5,7 +5,6 @@ read -r listfile
 
 printf "Please enter the file to move: "
 read -r file
-echo $file
 
 # For each Onedrive in the list: 
 #
@@ -16,7 +15,6 @@ echo $file
 while IFS=$'\t' read -r f1
 do
 	apps=$(rclone ls --include "*/SIGMONDO/**" "$f1:" | perl -ne 'if (/(\d+ )(\w+)((\/\w+)+)/) {print "$2\n"; exit;}')
-	echo $apps
 	if [[ -n "$apps" ]]
 	then
 		printf "SIGMONDO exists on the target remote %s in %s directory.\n" "$f1" "$apps"
