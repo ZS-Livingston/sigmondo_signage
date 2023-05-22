@@ -3,7 +3,7 @@
 printf "Please enter the signage drives listfile: "
 read -r listfile
 
-printf "Please enter the file to move: "
+printf "Please enter the full path of the file to archive: "
 read -r file
 
 # For each Onedrive in the list: 
@@ -21,7 +21,7 @@ do
 		
 		# Check if "Signage Archive" directory exists
 		archive=$(rclone lsf "$f1:" | grep -io "^Signage Archive")
-		echo $archive
+		printf "%s directory exists on %s:/Signage Archive/\n" "$archive" "$f1"
 		if [[ -z "$archive" ]]
 		then
 			# If "Signage Archive" directory doesn't exist, create it
@@ -31,7 +31,7 @@ do
 		
 		# Move the file
 		rclone moveto "$f1:$file" "$f1:$archive/${file##*/}" \
-		&& printf "File moved to %s:/%s/\n" "$f1" "$archive"
+		&& printf "File moved to %s:%s/\n" "$f1" "$archive"
 	fi
 
 done <"$listfile"
